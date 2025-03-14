@@ -1,0 +1,96 @@
+# 基础配置
+basic:
+  # 日志配置
+  log:
+    level: INFO
+    format: "[%(asctime)s] %(levelname)s: %(message)s"
+    date_format: "%Y-%m-%d %H:%M:%S"
+  # 文件日志配置
+  file:
+    path: "logs/monitor.log"  # 日志文件路径
+    backup_count: 7          # 保留7天的日志文件
+
+# Elasticsearch配置
+elasticsearch:
+  # 集群配置
+  clusters:
+    - name: "es-cluster"  # 集群名称
+      hosts:  # 集群节点列表
+        - "http://*************"
+        - "http://*************"
+        - "http://*************"
+      username: "elastic"
+      password: "NQiAfW1c9ubFdaJHfZ8d"
+      ssl: false  # 是否启用SSL
+  timeout: 30
+  # 日志保留配置
+  retention:
+    days: 7  # 日志保留天数
+  # 重试配置
+  retry:
+    max_retries: 3
+    retry_interval: 5
+
+# 告警通道配置
+alert_channels:
+  lark:
+    token: "**************"  # 飞书机器人 token
+    base_url: "https://open.larksuite.com/open-apis/bot/v2/hook/"  # 飞书 API 基础地址
+    retry_times: 3
+    retry_interval: 5
+    # 消息模板
+    templates:
+      error: |
+        【严重告警】发现异常日志
+        服务: {service}
+        时间范围: {time_range}
+        错误数量: {count}
+        样例消息:
+        {sample_messages}
+      warning: |
+        【警告通知】发现警告日志
+        服务: {service}
+        时间范围: {time_range}
+        警告数量: {count}
+        样例消息:
+        {sample_messages}
+
+# 监控配置
+monitor:
+  # 扫描配置
+  scan:
+    interval: 300  # 扫描间隔(秒)
+    batch_size: 1000  # 每批处理数量
+    concurrent_rules: 5  # 并发规则数
+  
+  # 索引配置
+  indices:
+    - pattern: "prod-*"
+      description: "prod日志索引"
+
+# 告警规则配置
+alert_rules:
+  # 错误日志告警
+  - name: "Error Log Alert"
+    enabled: true  # 是否启用
+    description: "检测ERROR级别日志"
+    cluster: "es-cluster"  # 指定要查询的集群
+    index: "prod-*"
+    priority: "high"  # 优先级：high/medium/low
+    
+    # 匹配条件
+    conditions:
+      keywords: ["error", "exception", "failed"]  # 关键词匹配
+      fields:  # 字段匹配
+        level: "ERROR" # 日志级别 
+        service: "prod" # 服务名称  
+      exclude_keywords: ["expected", "handled"]  # 排除关键词
+    
+    # 告警配置
+    alert:
+      threshold: 10  # 告警阈值
+      time_window: 5  # 时间窗口(分钟)
+      interval: 300   # 告警间隔(秒)
+      max_samples: 3  # 最大样例数
+      template: "error"  # 使用的模板名称
+      channels: ["lark"]  # 告警通道

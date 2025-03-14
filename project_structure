@@ -1,0 +1,4 @@
+log_alert/
+├── config.yaml
+├── log_monitor.py
+└── requirements.txt 
