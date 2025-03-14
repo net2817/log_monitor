@@ -19,8 +19,8 @@ elasticsearch:
         - "http://*************"
         - "http://*************"
         - "http://*************"
-      username: "elastic"
-      password: "NQiAfW1c9ubFdaJHfZ8d"
+      username: "******"
+      password: "******"
       ssl: false  # 是否启用SSL
   timeout: 30
   # 日志保留配置
